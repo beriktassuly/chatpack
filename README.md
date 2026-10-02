@@ -36,7 +36,7 @@ Minimal builds can opt into only the parsers and writers they need:
 
 ```toml
 [dependencies]
-chatpack = { version = "0.6.0", default-features = false, features = ["telegram", "csv-output"] }
+chatpack = { version = "0.7.0", default-features = false, features = ["telegram", "csv-output"] }
 ```
 
 ## Quick Start
@@ -114,6 +114,15 @@ let compact = OutputConfig::new();
 let detailed = OutputConfig::all();
 let timestamps_only = OutputConfig::new().with_timestamps();
 ```
+
+For Telegram exports, `with_replies()` includes the referenced ID and, when
+available, the referenced message's sender or the title of a referenced topic.
+These appear as `ReplyTo`, `ReplyToSender`, and `ReplyToTopic` in CSV (and
+`reply_to`, `reply_to_sender`, and `reply_to_topic` in JSON/JSONL). Topic
+creation events are service records, so their IDs may appear as reply targets
+even though they are not emitted as messages. The standard and async parsers
+resolve the extra context from the complete export; streaming retains the ID.
+When an AyuGram sender name is `-`, its `from_id` is used when present.
 
 ## Feature Flags
 

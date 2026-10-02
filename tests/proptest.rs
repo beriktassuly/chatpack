@@ -66,6 +66,8 @@ fn arb_message() -> impl Strategy<Value = Message> {
             timestamp: None,
             id: None,
             reply_to: None,
+            reply_to_sender: None,
+            reply_to_topic: None,
             edited: None,
         })
 }
@@ -375,6 +377,8 @@ proptest! {
                 timestamp: None,
                 id: None,
                 reply_to: None,
+                reply_to_sender: None,
+                reply_to_topic: None,
                 edited: None,
             })
             .collect();
@@ -392,6 +396,8 @@ proptest! {
                 timestamp: None,
                 id: None,
                 reply_to: None,
+                reply_to_sender: None,
+                reply_to_topic: None,
                 edited: None,
             })
             .collect();
@@ -425,6 +431,8 @@ proptest! {
                 timestamp: None,
                 id: None,
                 reply_to: None,
+                reply_to_sender: None,
+                reply_to_topic: None,
                 edited: None,
             })
             .collect();
@@ -534,6 +542,8 @@ proptest! {
             timestamp: None,
             id: None,
             reply_to: None,
+            reply_to_sender: None,
+            reply_to_topic: None,
             edited: None,
         };
         let _ = merge_consecutive(vec![msg.clone(), msg]);
@@ -558,6 +568,8 @@ proptest! {
             timestamp: None,
             id: None,
             reply_to: None,
+            reply_to_sender: None,
+            reply_to_topic: None,
             edited: None,
         };
         let merged = merge_consecutive(vec![msg]);
@@ -596,6 +608,8 @@ proptest! {
             timestamp: chrono::DateTime::from_timestamp(ts, 0),
             id: Some(id),
             reply_to: reply,
+            reply_to_sender: None,
+            reply_to_topic: None,
             edited: None,
         };
 
@@ -675,6 +689,9 @@ proptest! {
             msg_type: msg_type.to_string(),
             date_unixtime: ts.map(|t| t.to_string()),
             from: sender.map(|s| s.to_string()),
+            from_id: None,
+            action: None,
+            title: None,
             text: Some(text_value),
             reply_to_message_id: None,
             edited_unixtime: None,
@@ -692,6 +709,9 @@ proptest! {
             msg_type: msg_type.to_string(),
             date_unixtime: Some("1700000000".to_string()),
             from: Some("Alice".to_string()),
+            from_id: None,
+            action: None,
+            title: None,
             text: Some(json!("Hello")),
             reply_to_message_id: None,
             edited_unixtime: None,
@@ -1299,6 +1319,8 @@ mod edge_cases {
             timestamp: chrono::DateTime::from_timestamp(1700000000, 0),
             id: Some(123),
             reply_to: Some(100),
+            reply_to_sender: None,
+            reply_to_topic: None,
             edited: chrono::DateTime::from_timestamp(1700000100, 0),
         };
 
@@ -1357,6 +1379,8 @@ mod edge_cases {
                 timestamp: Some(chrono::Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap()),
                 id: None,
                 reply_to: None,
+                reply_to_sender: None,
+                reply_to_topic: None,
                 edited: None,
             },
             Message {
@@ -1369,6 +1393,8 @@ mod edge_cases {
                 ),
                 id: None,
                 reply_to: None,
+                reply_to_sender: None,
+                reply_to_topic: None,
                 edited: None,
             },
         ];

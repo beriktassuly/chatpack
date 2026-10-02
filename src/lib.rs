@@ -194,7 +194,7 @@
 //! ```toml
 //! # Cargo.toml - minimal configuration
 //! [dependencies]
-//! chatpack = { version = "0.6.0", default-features = false, features = ["telegram", "csv-output"] }
+//! chatpack = { version = "0.7.0", default-features = false, features = ["telegram", "csv-output"] }
 //! ```
 //!
 //! # Serialization

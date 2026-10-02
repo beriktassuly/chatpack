@@ -1,6 +1,6 @@
 [package]
 name = "chatpack"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2024"
 description = "Prepare chat data for RAG / LLM ingestion. Supports Telegram, WhatsApp, Instagram, Discord."
 authors = ["Mukhammedali Berektassuly <mukhammedali@berektassuly.com>"]

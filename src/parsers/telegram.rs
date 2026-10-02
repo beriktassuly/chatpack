@@ -9,7 +9,7 @@ use crate::Message;
 use crate::config::TelegramConfig;
 use crate::error::ChatpackError;
 use crate::parser::{Parser, Platform};
-use crate::parsing::telegram::{TelegramExport, parse_telegram_message};
+use crate::parsing::telegram::{TelegramExport, parse_telegram_export};
 
 #[cfg(feature = "streaming")]
 use crate::streaming::{StreamingConfig, StreamingParser, TelegramStreamingParser};
@@ -94,14 +94,7 @@ impl TelegramParser {
     fn parse_content(&self, content: &str) -> Result<Vec<Message>, ChatpackError> {
         let export: TelegramExport = serde_json::from_str(content)?;
 
-        // Use shared parsing logic
-        let messages = export
-            .messages
-            .iter()
-            .filter_map(parse_telegram_message)
-            .collect();
-
-        Ok(messages)
+        Ok(parse_telegram_export(&export))
     }
 }
 

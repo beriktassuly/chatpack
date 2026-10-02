@@ -7,7 +7,7 @@ use async_trait::async_trait;
 use crate::Message;
 use crate::config::TelegramConfig;
 use crate::error::ChatpackError;
-use crate::parsing::telegram::{TelegramExport, parse_telegram_message};
+use crate::parsing::telegram::{TelegramExport, parse_telegram_export};
 
 use super::{AsyncParser, read_file_async};
 
@@ -67,13 +67,7 @@ impl AsyncParser for AsyncTelegramParser {
     fn parse_str(&self, content: &str) -> Result<Vec<Message>, ChatpackError> {
         let export: TelegramExport = serde_json::from_str(content)?;
 
-        let messages = export
-            .messages
-            .iter()
-            .filter_map(parse_telegram_message)
-            .collect();
-
-        Ok(messages)
+        Ok(parse_telegram_export(&export))
     }
 }
 

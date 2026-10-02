@@ -545,7 +545,7 @@ pub trait Parser: Send + Sync {
 ///
 /// ```toml
 /// [dependencies]
-/// chatpack = { version = "0.6.0", features = ["telegram"] }
+/// chatpack = { version = "0.7.0", features = ["telegram"] }
 /// ```
 pub fn create_parser(platform: Platform) -> Box<dyn Parser> {
     match platform {

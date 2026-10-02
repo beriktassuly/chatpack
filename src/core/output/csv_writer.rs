@@ -20,7 +20,7 @@ use crate::error::ChatpackError;
 /// - Base: `Sender`, `Content`
 /// - `with_timestamps()`: adds `Timestamp` column
 /// - `with_ids()`: adds `ID` column
-/// - `with_replies()`: adds `ReplyTo` column
+/// - `with_replies()`: adds `ReplyTo`, `ReplyToSender`, and `ReplyToTopic` columns
 /// - `with_edited()`: adds `Edited` column
 ///
 /// # Examples
@@ -123,6 +123,8 @@ fn build_header(config: &OutputConfig) -> Vec<&'static str> {
 
     if config.include_replies {
         header.push("ReplyTo");
+        header.push("ReplyToSender");
+        header.push("ReplyToTopic");
     }
     if config.include_edited {
         header.push("Edited");
@@ -151,6 +153,8 @@ fn build_record(msg: &Message, config: &OutputConfig) -> Vec<String> {
 
     if config.include_replies {
         record.push(msg.reply_to.map(|id| id.to_string()).unwrap_or_default());
+        record.push(msg.reply_to_sender.clone().unwrap_or_default());
+        record.push(msg.reply_to_topic.clone().unwrap_or_default());
     }
     if config.include_edited {
         record.push(

@@ -4,7 +4,9 @@
 //! and streaming Telegram parsers.
 
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
+use std::collections::HashMap;
+
+use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
 use crate::Message;
@@ -15,6 +17,7 @@ use crate::Message;
 #[derive(Debug, Deserialize)]
 pub struct TelegramRawMessage {
     /// Message ID
+    #[serde(default, deserialize_with = "deserialize_optional_id")]
     pub id: Option<u64>,
     /// Message type (we only care about "message")
     #[serde(rename = "type")]
@@ -23,9 +26,16 @@ pub struct TelegramRawMessage {
     pub date_unixtime: Option<String>,
     /// Sender name
     pub from: Option<String>,
+    /// Stable sender ID, used when the display name is a placeholder.
+    pub from_id: Option<String>,
+    /// Service action, used to identify topic creation references.
+    pub action: Option<String>,
+    /// Topic title on a topic creation service event.
+    pub title: Option<String>,
     /// Message text (can be string or array)
     pub text: Option<Value>,
     /// Reply reference
+    #[serde(default, deserialize_with = "deserialize_optional_id")]
     pub reply_to_message_id: Option<u64>,
     /// Edit timestamp as string (if message was edited)
     pub edited_unixtime: Option<String>,
@@ -35,6 +45,51 @@ pub struct TelegramRawMessage {
 #[derive(Debug, Deserialize)]
 pub struct TelegramExport {
     pub messages: Vec<TelegramRawMessage>,
+}
+
+// AyuGram can assign negative IDs to service events. Those events are not
+// exported as chat messages, so their IDs cannot be represented by Message.
+fn deserialize_optional_id<'de, D>(deserializer: D) -> Result<Option<u64>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let number = Option::<serde_json::Number>::deserialize(deserializer)?;
+    Ok(number.and_then(|number| number.as_u64()))
+}
+
+/// Parse an entire export and resolve reply authors from its message IDs.
+/// A reply to a service event (such as a topic creation) keeps its target ID
+/// but has no message author.
+pub fn parse_telegram_export(export: &TelegramExport) -> Vec<Message> {
+    let targets: HashMap<u64, &TelegramRawMessage> = export
+        .messages
+        .iter()
+        .filter_map(|raw| Some((raw.id?, raw)))
+        .collect();
+
+    export
+        .messages
+        .iter()
+        .filter_map(|raw| {
+            let mut message = parse_telegram_message(raw)?;
+            if let Some(target) = message.reply_to.and_then(|id| targets.get(&id)) {
+                if target.msg_type == "message" {
+                    message.reply_to_sender = telegram_sender(target).map(str::to_owned);
+                } else if target.action.as_deref() == Some("topic_created") {
+                    message.reply_to_topic.clone_from(&target.title);
+                }
+            }
+            Some(message)
+        })
+        .collect()
+}
+
+fn telegram_sender(raw: &TelegramRawMessage) -> Option<&str> {
+    raw.from
+        .as_deref()
+        .filter(|name| !name.trim().is_empty() && *name != "-")
+        .or(raw.from_id.as_deref().filter(|id| !id.is_empty()))
+        .or(raw.from.as_deref())
 }
 
 /// Extracts text content from Telegram's complex `text` field.
@@ -102,7 +157,7 @@ pub fn parse_telegram_message(msg: &TelegramRawMessage) -> Option<Message> {
         return None;
     }
 
-    let sender = msg.from.as_ref()?;
+    let sender = telegram_sender(msg)?;
     let text_value = msg.text.as_ref()?;
     let content = extract_telegram_text(text_value);
 
@@ -179,6 +234,9 @@ mod tests {
             msg_type: "message".to_string(),
             date_unixtime: Some("1705314600".to_string()),
             from: Some("Alice".to_string()),
+            from_id: None,
+            action: None,
+            title: None,
             text: Some(json!("Hello!")),
             reply_to_message_id: None,
             edited_unixtime: None,
@@ -200,6 +258,9 @@ mod tests {
             msg_type: "service".to_string(),
             date_unixtime: Some("1705314600".to_string()),
             from: Some("Alice".to_string()),
+            from_id: None,
+            action: None,
+            title: None,
             text: Some(json!("pinned a message")),
             reply_to_message_id: None,
             edited_unixtime: None,
@@ -215,11 +276,38 @@ mod tests {
             msg_type: "message".to_string(),
             date_unixtime: Some("1705314600".to_string()),
             from: Some("Alice".to_string()),
+            from_id: None,
+            action: None,
+            title: None,
             text: Some(json!("   ")),
             reply_to_message_id: None,
             edited_unixtime: None,
         };
 
         assert!(parse_telegram_message(&msg).is_none());
+    }
+
+    #[test]
+    fn test_negative_service_ids_and_reply_authors() {
+        let export: TelegramExport = serde_json::from_str(
+            r#"{"messages":[
+                {"id":-999994266,"type":"service"},
+                {"id":2,"type":"service","action":"topic_created","title":"News"},
+                {"id":10,"type":"message","from":"-","from_id":"user42","text":"First"},
+                {"id":11,"type":"message","from":"Bob","text":"Answer","reply_to_message_id":10},
+                {"id":12,"type":"message","from":"Carol","text":"In topic","reply_to_message_id":2}
+            ]}"#,
+        )
+        .unwrap();
+
+        assert_eq!(export.messages[0].id, None);
+        let messages = parse_telegram_export(&export);
+        assert_eq!(messages.len(), 3);
+        assert_eq!(messages[1].reply_to, Some(10));
+        assert_eq!(messages[0].sender, "user42");
+        assert_eq!(messages[1].reply_to_sender.as_deref(), Some("user42"));
+        assert_eq!(messages[2].reply_to, Some(2));
+        assert_eq!(messages[2].reply_to_sender, None);
+        assert_eq!(messages[2].reply_to_topic.as_deref(), Some("News"));
     }
 }

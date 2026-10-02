@@ -8,7 +8,7 @@
 //!
 //! A message consists of:
 //! - **Required**: `sender` and `content`
-//! - **Optional**: `timestamp`, `id`, `reply_to`, `edited`
+//! - **Optional**: `timestamp`, `id`, `reply_to`, `reply_to_sender`, `reply_to_topic`, `edited`
 //!
 //! # Examples
 //!
@@ -66,7 +66,9 @@ use serde::{Deserialize, Serialize};
 /// | `content` | `String` | Text content of the message |
 /// | `timestamp` | `Option<DateTime<Utc>>` | When the message was sent |
 /// | `id` | `Option<u64>` | Platform-specific message identifier |
-/// | `reply_to` | `Option<u64>` | ID of the parent message (for replies) |
+/// | `reply_to` | `Option<u64>` | ID of the referenced message or topic service event |
+/// | `reply_to_sender` | `Option<String>` | Author of the referenced message, when available |
+/// | `reply_to_topic` | `Option<String>` | Title of a referenced Telegram topic creation event |
 /// | `edited` | `Option<DateTime<Utc>>` | When the message was last edited |
 ///
 /// # Construction
@@ -139,6 +141,16 @@ pub struct Message {
     #[serde(default)]
     pub reply_to: Option<u64>,
 
+    /// Author of the referenced message, when the export contains it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub reply_to_sender: Option<String>,
+
+    /// Title of the referenced topic, when the reply target creates a topic.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub reply_to_topic: Option<String>,
+
     /// When the message was last edited.
     ///
     /// Present when the platform tracks edit history (Telegram, Discord).
@@ -169,6 +181,8 @@ impl Message {
             timestamp: None,
             id: None,
             reply_to: None,
+            reply_to_sender: None,
+            reply_to_topic: None,
             edited: None,
         }
     }
@@ -191,6 +205,8 @@ impl Message {
             timestamp,
             id,
             reply_to,
+            reply_to_sender: None,
+            reply_to_topic: None,
             edited,
         }
     }

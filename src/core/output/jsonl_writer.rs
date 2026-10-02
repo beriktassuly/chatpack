@@ -29,6 +29,10 @@ struct JsonlMessage {
     #[serde(skip_serializing_if = "Option::is_none")]
     reply_to: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    reply_to_sender: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    reply_to_topic: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     edited: Option<String>,
 }
 
@@ -46,6 +50,16 @@ impl JsonlMessage {
             id: if config.include_ids { msg.id } else { None },
             reply_to: if config.include_replies {
                 msg.reply_to
+            } else {
+                None
+            },
+            reply_to_sender: if config.include_replies {
+                msg.reply_to_sender.clone()
+            } else {
+                None
+            },
+            reply_to_topic: if config.include_replies {
+                msg.reply_to_topic.clone()
             } else {
                 None
             },
