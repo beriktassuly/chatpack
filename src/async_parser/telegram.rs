@@ -202,7 +202,7 @@ mod tests {
         let json = r#"{"messages": []}"#;
         let parser = AsyncTelegramParser::new();
         let messages = parser.parse_str(json).unwrap();
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     #[test]

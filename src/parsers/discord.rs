@@ -787,7 +787,7 @@ mod tests {
         let parser = DiscordParser::new();
         let json = r#"{"messages": []}"#;
         let messages = parser.parse_json(json).unwrap();
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     // =========================================================================
@@ -860,7 +860,7 @@ mod tests {
         let parser = DiscordParser::new();
         let txt = "";
         let messages = parser.parse_txt(txt).unwrap();
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     // =========================================================================

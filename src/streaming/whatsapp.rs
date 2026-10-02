@@ -377,7 +377,7 @@ This is a continuation line
                 .unwrap();
 
         let messages: Vec<_> = iterator.filter_map(Result::ok).collect();
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     // =========================================================================
@@ -544,7 +544,7 @@ With no pattern";
                 .unwrap();
 
         let messages: Vec<_> = iterator.filter_map(Result::ok).collect();
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     #[test]

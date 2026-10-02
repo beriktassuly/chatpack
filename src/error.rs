@@ -720,7 +720,7 @@ mod tests {
     fn test_parse_error_kind_json() {
         let json_err = serde_json::from_str::<serde_json::Value>("invalid").unwrap_err();
         let kind = ParseErrorKind::Json(json_err);
-        assert!(!kind.to_string().is_empty());
+        assert_ne!(kind.to_string(), "");
     }
 
     // =========================================================================

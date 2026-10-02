@@ -248,7 +248,7 @@ mod tests {
                 .unwrap();
 
         let messages: Vec<_> = iterator.by_ref().filter_map(Result::ok).collect();
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     #[test]
@@ -515,6 +515,6 @@ mod tests {
 
         let messages: Vec<_> = iterator.by_ref().filter_map(Result::ok).collect();
         // Message without content should be skipped
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 }

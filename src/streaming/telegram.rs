@@ -245,7 +245,7 @@ mod tests {
                 .unwrap();
 
         let messages: Vec<_> = iterator.by_ref().filter_map(Result::ok).collect();
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     #[test]
@@ -471,7 +471,7 @@ mod tests {
                 .unwrap();
 
         let messages: Vec<_> = iterator.by_ref().filter_map(Result::ok).collect();
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     #[test]

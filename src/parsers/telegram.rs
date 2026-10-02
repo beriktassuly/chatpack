@@ -333,7 +333,7 @@ mod tests {
         let parser = TelegramParser::new();
         let json = r#"{"messages": []}"#;
         let messages = parser.parse_str(json).expect("parse failed");
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     #[test]

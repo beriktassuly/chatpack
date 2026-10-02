@@ -366,7 +366,7 @@ mod tests {
         let parser = WhatsAppParser::new();
         let content = "";
         let messages = parser.parse_str(content).expect("parse failed");
-        assert!(messages.is_empty());
+        assert_eq!(messages, []);
     }
 
     #[test]

@@ -228,7 +228,7 @@ mod tests {
     fn test_merge_empty() {
         let messages: Vec<Message> = vec![];
         let merged = merge_consecutive(messages);
-        assert!(merged.is_empty());
+        assert_eq!(merged, []);
     }
 
     #[test]
