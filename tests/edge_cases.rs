@@ -64,8 +64,8 @@ fn test_combining_diacritics() {
     let nfd = Message::new(nfd_content, "NFD form");
 
     // Both should work, even if different representations
-    assert!(!nfc.sender.is_empty());
-    assert!(!nfd.sender.is_empty());
+    assert_ne!(nfc.sender, "");
+    assert_ne!(nfd.sender, "");
 }
 
 // =========================================================================
@@ -104,7 +104,7 @@ fn test_very_long_sender_name() {
 #[test]
 fn test_empty_sender_name() {
     let msg = Message::new("", "Content");
-    assert!(msg.sender.is_empty());
+    assert_eq!(msg.sender, "");
 }
 
 #[test]
@@ -216,7 +216,7 @@ fn test_filter_empty_result() {
     let messages = vec![msg];
     let filter = FilterConfig::new().after_date("2025-01-01").unwrap();
     let filtered = chatpack::core::filter::apply_filters(messages, &filter);
-    assert!(filtered.is_empty());
+    assert_eq!(filtered, []);
 }
 
 #[test]
@@ -244,7 +244,7 @@ fn test_filter_user_case_insensitive() {
 fn test_merge_empty_vector() {
     let empty: Vec<Message> = vec![];
     let result = merge_consecutive(empty);
-    assert!(result.is_empty());
+    assert_eq!(result, []);
 }
 
 #[test]
@@ -367,7 +367,7 @@ fn test_csv_escaping_special_chars() {
     let csv = to_csv(&messages, &config).expect("CSV generation failed");
 
     // Verify the CSV can be generated without errors
-    assert!(!csv.is_empty());
+    assert_ne!(csv, "");
     assert!(csv.contains("Alice"));
     assert!(csv.contains("Bob"));
 }
@@ -483,8 +483,8 @@ fn test_message_serde_ignores_unknown_fields() {
 #[test]
 fn test_message_default() {
     let msg = Message::default();
-    assert!(msg.sender.is_empty());
-    assert!(msg.content.is_empty());
+    assert_eq!(msg.sender, "");
+    assert_eq!(msg.content, "");
     assert!(msg.timestamp.is_none());
     assert!(msg.id.is_none());
     assert!(msg.reply_to.is_none());

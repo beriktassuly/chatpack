@@ -322,7 +322,7 @@ mod discord_tests {
             .parse_file(&format!("{}/discord.txt", fixtures_dir()))
             .unwrap();
 
-        assert!(!messages.is_empty());
+        assert_ne!(messages, []);
         assert_eq!(messages[0].sender, "Alice");
         assert!(messages[0].content.contains("Hello Discord!"));
     }
@@ -461,7 +461,7 @@ mod whatsapp_tests {
             .parse_file(&format!("{}/whatsapp_us.txt", fixtures_dir()))
             .unwrap();
 
-        assert!(!messages.is_empty());
+        assert_ne!(messages, []);
 
         let senders: Vec<&str> = messages.iter().map(|m| m.sender.as_str()).collect();
         assert!(senders.contains(&"Alice"));
@@ -476,7 +476,7 @@ mod whatsapp_tests {
             .parse_file(&format!("{}/whatsapp_eu.txt", fixtures_dir()))
             .unwrap();
 
-        assert!(!messages.is_empty());
+        assert_ne!(messages, []);
         let has_cyrillic = messages.iter().any(|m| m.content.contains("Привет"));
         assert!(has_cyrillic);
     }
@@ -543,7 +543,7 @@ mod instagram_tests {
             .parse_file(&format!("{}/instagram.json", fixtures_dir()))
             .unwrap();
 
-        assert!(!messages.is_empty());
+        assert_ne!(messages, []);
 
         let senders: Vec<&str> = messages.iter().map(|m| m.sender.as_str()).collect();
         assert!(senders.contains(&"user_one"));
@@ -644,7 +644,7 @@ mod filter_integration_tests {
         let config = FilterConfig::new().before_date("2024-01-01").unwrap();
 
         let filtered = apply_filters(messages, &config);
-        assert!(filtered.is_empty());
+        assert_eq!(filtered, []);
     }
 
     #[test]

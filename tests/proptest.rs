@@ -1207,7 +1207,7 @@ mod edge_cases {
         let messages: Vec<Message> = vec![];
         let config = FilterConfig::new().with_user("Anyone".into());
         let filtered = apply_filters(messages, &config);
-        assert!(filtered.is_empty());
+        assert_eq!(filtered, []);
     }
 
     #[test]
